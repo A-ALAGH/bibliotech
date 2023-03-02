@@ -8,9 +8,11 @@ const {
   getlivreById,
   updatelivre,
   deletelivre,
-  borrowlivre,
-  returnlivre,
-  getlivresCount,
+  borrowLivre ,
+  returnLivre,
+  countLivres,
+  countLivresById
+
 } = require('../controllers/livreController');
 
 // @route   POST api/livres
@@ -41,16 +43,18 @@ router.delete('/:id', auth, deletelivre);
 // @route   PUT api/livres/borrow/:id
 // @desc    Borrow a livre
 // @access  Private
-router.put('/borrow/:id', auth, borrowlivre);
+router.put('/borrow/:id', auth, borrowLivre );
 
 // @route   PUT api/livres/return/:id
 // @desc    Return a livre
 // @access  Private
-router.put('/return/:id', auth, returnlivre);
+router.put('/return/:id', auth, returnLivre);
 
 // @route   GET api/livres/count/:title
 // @desc    Get the number of livres with a given title
 // @access  Public
-router.get('/count/:title', getlivresCount);
+router.get('/count/:title', countLivres);
+
+router.get('/countbyid/:id', countLivresById);
 
 module.exports = router;

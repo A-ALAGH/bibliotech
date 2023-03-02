@@ -8,8 +8,8 @@ const livreSchema = new Schema({
   nombreExemplaires: { type: Number, required: true, min: 0 }
 });
 
-const Livre = mongoose.model('Livre', livreSchema);
+const livre = mongoose.model('Livre', livreSchema);
 
 module.exports = {
-  Livre
+  livre
 };

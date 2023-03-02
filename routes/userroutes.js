@@ -68,6 +68,6 @@ router.get('/:id', auth, getUserById);
 // @route   PUT api/users/:id
 // @desc    Update user
 // @access  Private/Admin
-router.put('/:id', auth, updateUser);
+//router.put('/:id', auth, updateUser);
 
 module.exports = router;

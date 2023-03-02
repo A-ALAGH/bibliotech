@@ -5,6 +5,13 @@ const app = express();
 // Middleware
 app.use(express.json());
 
+//débuggage authentification
+app.post('/api/users', (req, res) => {
+    const user = req.body;
+    console.log(user);
+    res.status(201).send('User created');
+  });
+
 // Connexion à la base de données MongoDB
 mongoose.connect('mongodb+srv://Abbas:abbas@bibliotech.wr1y9ku.mongodb.net/mydatabase?retryWrites=true&w=majority', {
   /*useNewUrlParser: true,

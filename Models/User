@@ -5,11 +5,11 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, enum: ['bibliothequaire', 'client'] }
+  role: { type: String, required: true, enum: ['employee', 'client'], default:'client' }
 });
 
 const User = mongoose.model('User', UserSchema);
 
-module.exports = {
-  User
-};
+module.exports =
+  User;
+

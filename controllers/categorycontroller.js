@@ -1,7 +1,7 @@
 const Category = require('../models/category');
 
 // Afficher toutes les catégories
-exports.category_list = async (req, res) => {
+exports.getCategories = async (req, res) => {
   try {
     const categories = await Category.find();
     res.status(200).json(categories);
@@ -11,7 +11,7 @@ exports.category_list = async (req, res) => {
 };
 
 // Afficher une catégorie en particulier
-exports.category_detail = async (req, res) => {
+exports.getCategoryById = async (req, res) => {
   const id = req.params.id;
   try {
     const category = await Category.findById(id);
@@ -25,7 +25,7 @@ exports.category_detail = async (req, res) => {
 };
 
 // Ajouter une nouvelle catégorie
-exports.category_create = async (req, res) => {
+exports.createCategory = async (req, res) => {
   const category = new Category({
     name: req.body.name,
     description: req.body.description,
@@ -39,7 +39,7 @@ exports.category_create = async (req, res) => {
 };
 
 // Mettre à jour une catégorie
-exports.category_update = async (req, res) => {
+exports.updateCategory = async (req, res) => {
   const id = req.params.id;
   try {
     const category = await Category.findById(id);
@@ -56,7 +56,7 @@ exports.category_update = async (req, res) => {
 };
 
 // Supprimer une catégorie
-exports.category_delete = async (req, res) => {
+exports.deleteCategory = async (req, res) => {
   const id = req.params.id;
   try {
     const category = await Category.findById(id);

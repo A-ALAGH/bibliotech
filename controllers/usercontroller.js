@@ -1,11 +1,15 @@
-const User = require('../models/user');
+//const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { JWT_SECRET } = require('../config');
 
+const { mongoose } = require('mongoose');
+
+
+
 // Create new user
-exports.createUser = async (req, res) => {
+exports.registerUser = async (req, res) => {
   // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -55,7 +59,7 @@ exports.createUser = async (req, res) => {
 };
 
 // Get logged in user
-exports.getLoggedInUser = async (req, res) => {
+exports.getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
@@ -101,6 +105,78 @@ exports.loginUser = async (req, res) => {
       if (err) throw err;
       res.json({ token });
     });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+// Update user
+exports.updateUserProfile = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const { name, email, password } = req.body;
+
+  try {
+    let user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Update user fields
+    user.name = name || user.name;
+    user.email = email || user.email;
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    // Save updated user to database
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+// Get all users
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    res.json({ msg: 'User deleted' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
+// Get user by id
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    res.json(user);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
