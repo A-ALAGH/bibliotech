@@ -1,4 +1,5 @@
 const Livre = require('../models/livre');
+const rolemiddle=require('../middleware/auth')
 
 // Afficher tous les livres
 const getlivres = async (req, res) => {
@@ -124,6 +125,6 @@ const countLivresById = async (req, res) => {
   }
 };
 
-module.exports = { getlivres, getlivreById, createlivre, updatelivre, deletelivre, borrowLivre, returnLivre, countLivres, countLivresById };
+module.exports = { getlivres, getlivreById, createlivre: rolemiddle, updatelivre: rolemiddle, deletelivre :rolemiddle, borrowLivre, returnLivre, countLivres, countLivresById };
 
 

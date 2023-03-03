@@ -12,7 +12,14 @@ const auth = (req, res, next) => {
     res.status(401).json({ msg: 'Token is not valid' });
   }
 };
+const rolemiddle = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.role === 'employee') {
+    return next();
+  }
+  res.status(401).json({ success: false, message: 'Unauthorized' });
+}
 
-module.exports = auth;
+
+module.exports = auth, rolemiddle;
 
 
