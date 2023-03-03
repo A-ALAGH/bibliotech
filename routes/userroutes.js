@@ -10,7 +10,6 @@ const {
   getUsers,
   deleteUser,
   getUserById,
-  updateUser,
 } = require('../controllers/userController');
 
 // @route   POST api/users/register
@@ -19,7 +18,6 @@ const {
 router.post(
   '/register',
   [
-    check('name', 'Please enter a name').not().isEmpty(),
     check('email', 'Please enter a valid email').isEmail(),
     check('password', 'Please enter a password with 6 or more characters').isLength({
       min: 6,

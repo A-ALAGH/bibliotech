@@ -14,10 +14,10 @@ app.post('/api/users', (req, res) => {
 
 // Connexion à la base de données MongoDB
 mongoose.connect('mongodb+srv://Abbas:abbas@bibliotech.wr1y9ku.mongodb.net/mydatabase?retryWrites=true&w=majority', {
-  /*useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,*/
+  //useNewUrlParser: true,
+  //useUnifiedTopology: true,
+  //useCreateIndex: true,
+  //useFindAndModify: false,
 }).then(() => console.log('MongoDB Connected'));
 
 
@@ -27,15 +27,15 @@ const userRoutes = require('./routes/userRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const livreRoutes = require('./routes/livreRoutes');
-const empruntRoutes = require('./routes/empruntRoutes');
+//const empruntRoutes = require('./routes/empruntRoutes');
 
 // Routes
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/livres', livreRoutes);
-app.use('/api/emprunts', empruntRoutes);
+//app.use('/api/emprunts', empruntRoutes);
 
 // Start server
 const port = process.env.PORT || 3000;
