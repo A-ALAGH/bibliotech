@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const employeeSchema = new Schema({
   nom: { type: String, required: true },
@@ -9,11 +9,10 @@ const employeeSchema = new Schema({
   email: { type: String },
   dateEmbauche: { type: Date, required: true },
   poste: { type: String, required: true }
-});
+})
 
-
-const employee = mongoose.model('employee', employeeSchema);
+const employee = mongoose.model('employee', employeeSchema)
 
 module.exports = {
   employee
-};
+}
