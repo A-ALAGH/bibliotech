@@ -1,12 +1,12 @@
-const Livre = require('../models/livre')
+const { livre } = require('../models/livre')
 const rolemiddle = require('../middleware/auth')
-const router = ('router.express')
-const getUserById = require('userController')
+const router = require('express').Router()
+const getUserById = require('../controllers/userController')
 
 // Afficher tous les livres
 const getlivres = async (req, res) => {
   try {
-    const livres = await Livre.find().populate('categorie', 'nom')
+    const livres = await livre.find().populate('categorie', 'nom')
     res.status(200).json({ success: true, data: livres })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
@@ -16,11 +16,11 @@ const getlivres = async (req, res) => {
 // Afficher un livre par son ID
 const getlivreById = async (req, res) => {
   try {
-    const livre = await Livre.findById(req.params.id).populate('categorie', 'nom')
-    if (!livre) {
+    const livres = await livre.findById(req.params.id).populate('categorie', 'nom')
+    if (!livres) {
       return res.status(404).json({ success: false, message: 'Livre introuvable' })
     }
-    res.status(200).json({ success: true, data: livre })
+    res.status(200).json({ success: true, data: livres })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
   }
@@ -30,8 +30,8 @@ const getlivreById = async (req, res) => {
 const createlivre = async (req, res) => {
   try {
     router.post('/livres', rolemiddle('admin'), createlivre)
-    const livre = new Livre(req.body)
-    const newLivre = await livre.save()
+    const livres = new Livre(req.body)
+    const newLivre = await livres.save()
     res.status(201).json({ success: true, data: newLivre })
   } catch (error) {
     res.status(400).json({ success: false, message: error.message })
@@ -42,11 +42,11 @@ const createlivre = async (req, res) => {
 const updatelivre = async (req, res) => {
   try {
     router.put('/livres/:id', rolemiddle('admin'), updatelivre)
-    const livre = await Livre.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    if (!livre) {
+    const livres = await livre.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    if (!livres) {
       return res.status(404).json({ success: false, message: 'Livre introuvable' })
     }
-    res.status(200).json({ success: true, data: livre })
+    res.status(200).json({ success: true, data: livres })
   } catch (error) {
     res.status(400).json({ success: false, message: error.message })
   }
@@ -56,8 +56,8 @@ const updatelivre = async (req, res) => {
 const deletelivre = async (req, res) => {
   try {
     router.delete('/livres/:id', rolemiddle('admin'), deletelivre)
-    const livre = await Livre.findByIdAndDelete(req.params.id)
-    if (!livre) {
+    const livres = await livre.findByIdAndDelete(req.params.id)
+    if (!livres) {
       return res.status(404).json({ success: false, message: 'Livre introuvable' })
     }
     res.status(200).json({ success: true, data: {} })
@@ -68,9 +68,9 @@ const deletelivre = async (req, res) => {
 // emrpunt
 async function borrowLivre (userId, livreId) {
   const user = await getUserById(userId)
-  const livre = await Livre.findById(livreId)
+  const livres = await livre.findById(livreId)
 
-  if (!user || !livre) {
+  if (!user || !livres) {
     throw new Error('Utilisateur ou livre introuvable')
   }
 
@@ -82,29 +82,29 @@ async function borrowLivre (userId, livreId) {
     throw new Error("L'utilisateur a déjà emprunté 3 livres ce mois-ci")
   }
 
-  if (livre.copies === 0) {
+  if (livres.copies === 0) {
     throw new Error('Le livre est indisponible')
   }
 
   user.emprunts.push({ livre: livreId, date: new Date() })
-  livre.copies--
+  livres.copies--
   await user.save()
-  await livre.save()
+  await livres.save()
 }
 // retour
 const returnLivre = async (req, res) => {
   try {
-    const livre = await Livre.findById(req.params.id)
-    if (!livre) {
+    const livres = await livre.findById(req.params.id)
+    if (!livres) {
       return res.status(404).json({ success: false, message: 'Livre introuvable' })
     }
-    if (!livre.emprunteur) {
+    if (!livres.emprunteur) {
       return res.status(400).json({ success: false, message: "Le livre n'est pas emprunté" })
     }
-    livre.emprunteur = null
-    livre.empruntDate = null
-    await livre.save()
-    res.status(200).json({ success: true, data: livre })
+    livres.emprunteur = null
+    livres.empruntDate = null
+    await livres.save()
+    res.status(200).json({ success: true, data: livres })
   } catch (error) {
     res.status(400).json({ success: false, message: error.message })
   }
@@ -113,7 +113,7 @@ const returnLivre = async (req, res) => {
 // Compter tous les livres
 const countLivres = async (req, res) => {
   try {
-    const count = await Livre.countDocuments()
+    const count = await livre.countDocuments()
     res.status(200).json({ success: true, data: count })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })
@@ -123,7 +123,7 @@ const countLivres = async (req, res) => {
 // Compter les livres avec un ID spécifique
 const countLivresById = async (req, res) => {
   try {
-    const count = await Livre.countDocuments({ _id: req.params.id })
+    const count = await livre.countDocuments({ _id: req.params.id })
     res.status(200).json({ success: true, data: count })
   } catch (error) {
     res.status(500).json({ success: false, message: error.message })

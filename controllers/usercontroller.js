@@ -1,180 +1,119 @@
-const User = require('../models/user')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+const User = require('../models/User')
 const { validationResult } = require('express-validator')
-const { JWT_SECRET } = require('../config')
+const bcrypt = require('bcryptjs')
 
-// Create new user
-exports.registerUser = async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() })
-  }
-
-  const { name, email, password } = req.body
-
+// Get all users
+const getUsers = async (req, res) => {
   try {
-    // Check if user already exists
-    let user = await User.findOne({ email })
-    if (user) {
-      return res.status(400).json({ msg: 'User already exists' })
-    }
-
-    // Create new user
-    user = new User({
-      name,
-      email,
-      password
-    })
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10)
-    user.password = await bcrypt.hash(password, salt)
-
-    // Save user to database
-    await user.save()
-
-    // Create and return JWT token
-    const payload = {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    }
-    jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
-      if (err) throw err
-      res.json({ token })
-    })
+    const users = await User.find()
+    res.status(200).json({ success: true, data: users })
   } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
+    res.status(500).json({ success: false, message: error.message })
   }
 }
 
-// Get logged in user
-exports.getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password')
-    res.json(user)
-  } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
-  }
-}
-
-// Login user
-exports.loginUser = async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() })
-  }
-
-  const { email, password } = req.body
-
-  try {
-    // Check if user exists
-    const user = await User.findOne({ email })
-    if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' })
-    }
-
-    // Check if password is correct
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' })
-    }
-
-    // Create and return JWT token
-    const payload = {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    }
-    jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
-      if (err) throw err
-      res.json({ token })
-    })
-  } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
-  }
-}
-// Update user
-exports.updateUserProfile = async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() })
-  }
-
-  const { name, email, password } = req.body
-
+// Get user by ID
+const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' })
+      return res.status(404).json({ success: false, message: 'User not found' })
     }
-
-    // Update user fields
-    user.name = name || user.name
-    user.email = email || user.email
-
-    if (password) {
-      const salt = await bcrypt.genSalt(10)
-      user.password = await bcrypt.hash(password, salt)
-    }
-
-    // Save updated user to database
-    await user.save()
-
-    res.json(user)
+    res.status(200).json({ success: true, data: user })
   } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
+    res.status(500).json({ success: false, message: error.message })
   }
 }
-// Get all users
-exports.getUsers = async (req, res) => {
+
+// Create a new user
+const createUser = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+
   try {
-    const users = await User.find().select('-password')
-    res.json(users)
+    const user = new User(req.body)
+    const newUser = await user.save()
+    res.status(201).json({ success: true, data: newUser })
   } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
+    res.status(400).json({ success: false, message: error.message })
   }
 }
 
-// Delete user
-exports.deleteUser = async (req, res) => {
+// Update a user
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+    res.status(200).json({ success: true, data: user })
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message })
+  }
+}
+
+// Delete a user
+const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id)
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' })
+      return res.status(404).json({
+        msg: 'Utilisateur introuvable'
+      })
     }
-    res.json({ msg: 'User deleted' })
+    return res.status(200).json({
+      msg: 'Utilisateur supprimé avec succès'
+    })
+  } catch (err) {
+    return res.status(500).json({
+      msg: 'Quelque chose a mal tourné'
+    })
+  }
+}
+// Login function
+const login = async (req, res) => {
+  // Check for input errors
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+
+  // Get user credentials from request body
+  const { email, password } = req.body
+
+  try {
+    // Find user by email in database
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+
+    // Compare password with hashed password in database
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid password' })
+    }
+
+    // Create session for authenticated user
+    req.session.user = user
+
+    // Send response with user information
+    res.status(200).json({ success: true, data: user })
   } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
+    // Handle any errors
+    res.status(500).json({ success: false, message: error.message })
   }
 }
 
-// Get user by id
-exports.getUserById = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select('-password')
-    if (!user) {
-      return res.status(404).json({ msg: 'User not found' })
-    }
-    res.json(user)
-  } catch (error) {
-    console.error(error.message)
-    res.status(500).send('Server error')
-  }
+// Export login function
+
+module.exports = {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  login
 }

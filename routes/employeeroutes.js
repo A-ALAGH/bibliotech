@@ -16,7 +16,6 @@ const {
 router.post(
   '/',
   [
-    auth,
     check('email', 'Please include a valid email').isEmail(),
     check('password', 'Please enter a password with 6 or more characters').isLength({
       min: 6
@@ -29,12 +28,12 @@ router.post(
 // @route   GET api/employees
 // @desc    Get all employees
 // @access  Private/Admin
-router.get('/', auth, getEmployees)
+router.get('/', getEmployees)
 
 // @route   GET api/employees/:id
 // @desc    Get employee by ID
 // @access  Private/Admin
-router.get('/:id', auth, getEmployeeById)
+router.get('/:id', getEmployeeById)
 
 // @route   PUT api/employees/:id
 // @desc    Update an employee
@@ -42,7 +41,6 @@ router.get('/:id', auth, getEmployeeById)
 router.put(
   '/:id',
   [
-    auth,
     check('email', 'Please include a valid email').isEmail(),
     check('password', 'Please enter a password with 6 or more characters').isLength({
       min: 6
@@ -55,6 +53,6 @@ router.put(
 // @route   DELETE api/employees/:id
 // @desc    Delete an employee
 // @access  Private/Admin
-router.delete('/:id', auth, deleteEmployee)
+router.delete('/:id', deleteEmployee)
 
 module.exports = router
